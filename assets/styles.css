@@ -384,3 +384,20 @@ footer a:hover { color: var(--sun); text-decoration: underline; }
 .compare .after { justify-items: end; padding-right: 10%; }
 .compare .layer:has(img) { padding: 0; }
 @media (max-width: 59.99em) { .hero-art { max-width: 300px; } }
+
+/* ---------- Photo hero ---------- */
+.hero { background: var(--teal-900); min-height: min(88vh, 760px); display: flex; align-items: center; }
+.hero > .wrap { width: 100%; }
+.hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; }
+.hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(14, 59, 63, .96) 0%, rgba(14, 59, 63, .88) 42%, rgba(14, 59, 63, .35) 75%, rgba(14, 59, 63, .15) 100%),
+    linear-gradient(0deg, rgba(14, 59, 63, .55) 0%, rgba(14, 59, 63, 0) 40%);
+}
+.hero .wrap { z-index: 1; }
+.hero .wrap > div { max-width: 40rem; }
+@media (min-width: 60em) { .hero .wrap { grid-template-columns: 1fr; } }
+@media (max-width: 59.99em) {
+  .hero::after { background: linear-gradient(180deg, rgba(14, 59, 63, .82) 0%, rgba(14, 59, 63, .92) 60%, rgba(14, 59, 63, .97) 100%); }
+}
