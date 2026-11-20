@@ -6,7 +6,7 @@
 const CC_CONFIG = {
   // Google Apps Script web-app URL from lead-tracker/SETUP (ends in /exec).
   // Leave empty and the form falls back to opening an email to the leads inbox.
-  LEADS_ENDPOINT: "",
+  LEADS_ENDPOINT: "https://script.google.com/macros/s/AKfycby8bi527dObp6tWit3-7BP6WtgP-53x9ZB2DJnPqbSb_l6fWStemFQnEX-6seJDjcE0/exec",
 
   // Scheduling link for discovery calls (Calendly, Google Calendar appointment
   // schedule, etc.). Leave empty and "Book a call" buttons jump to the form.
