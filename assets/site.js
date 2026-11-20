@@ -24,6 +24,8 @@ const CC_CONFIG = {
    1. Put a matching before + after photo in /assets/photos/ (same size and framing,
       landscape, about 1400px wide, JPEG).
    2. Copy an entry below and change the text and file names.
+      Add layout: "side" to show the two photos next to each other instead of
+      the drag slider (best when the before and after weren't shot from the same spot).
    Never use photos where a child can be identified. */
 const CC_GALLERY = [
   {
@@ -53,6 +55,30 @@ const CC_GALLERY = [
     scope: "Child-height fixtures, new flooring, and a clean, bright finish",
     before: "/assets/photos/pv-restroom-before.jpg",
     after: "/assets/photos/pv-restroom-after.jpg",
+  },
+  {
+    project: "Palm Valley",
+    room: "The second comeback",
+    scope: "Years later, the building needed a full reset. We cleared it out and set up the learning spaces again",
+    before: "/assets/photos/pv2-classroom-before.jpg",
+    after: "/assets/photos/pv2-classroom-after.jpg",
+    layout: "side",
+  },
+  {
+    project: "Flow Academy · Tennessee",
+    room: "Early childhood classroom",
+    scope: "Learning centers stocked with materials, warm wood shelving, and a clear layout",
+    before: "/assets/photos/flow-classroom-before.jpg",
+    after: "/assets/photos/flow-classroom-after.jpg",
+    layout: "side",
+  },
+  {
+    project: "Anderson Mill",
+    room: "Outdoor side yard",
+    scope: "Bare dirt path turned into a clean gravel walkway with stepping stones",
+    before: "/assets/photos/am-side-yard-before.jpg",
+    after: "/assets/photos/am-side-yard-after.jpg",
+    layout: "side",
   },
 ];
 
@@ -206,15 +232,24 @@ document.querySelectorAll("[data-gallery]").forEach((track) => {
   CC_GALLERY.forEach((g, n) => {
     const name = `${g.project}: ${g.room}`;
     const lazy = n === 0 ? "" : ' loading="lazy"';
-    track.insertAdjacentHTML("beforeend", `
-      <div class="slide" role="group" aria-roledescription="slide" aria-label="${esc(name)}">
-        <div class="compare has-photos">
-          <div class="layer before"><img src="${esc(g.before)}" alt="${esc(g.room)} at ${esc(g.project)} before the comeback"${lazy} decoding="async"></div>
-          <div class="layer after"><img src="${esc(g.after)}" alt="${esc(g.room)} at ${esc(g.project)} after the comeback"${lazy} decoding="async"></div>
+    const altB = `${esc(g.room)} at ${esc(g.project)} before the comeback`;
+    const altA = `${esc(g.room)} at ${esc(g.project)} after the comeback`;
+    // layout "side": two photos next to each other (use when the shots aren't framed the same).
+    const media = g.layout === "side"
+      ? `<div class="side-by-side">
+          <figure><img src="${esc(g.before)}" alt="${altB}"${lazy} decoding="async"><span class="label l">Before</span></figure>
+          <figure><img src="${esc(g.after)}" alt="${altA}"${lazy} decoding="async"><span class="label r">After</span></figure>
+        </div>`
+      : `<div class="compare has-photos">
+          <div class="layer before"><img src="${esc(g.before)}" alt="${altB}"${lazy} decoding="async"></div>
+          <div class="layer after"><img src="${esc(g.after)}" alt="${altA}"${lazy} decoding="async"></div>
           <span class="label l">Before</span><span class="label r">After</span>
           <div class="divider"></div>
           <input type="range" min="0" max="100" value="50" aria-label="Compare before and after: ${esc(name)}">
-        </div>
+        </div>`;
+    track.insertAdjacentHTML("beforeend", `
+      <div class="slide" role="group" aria-roledescription="slide" aria-label="${esc(name)}">
+        ${media}
         <div class="slide-caption"><h3>${esc(g.project)} · ${esc(g.room)}</h3><p>${esc(g.scope)}</p></div>
       </div>`);
   });
