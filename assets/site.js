@@ -11,6 +11,9 @@ const CC_CONFIG = {
   // Scheduling link for discovery calls (Calendly, Google Calendar appointment
   // schedule, etc.). Leave empty and "Book a call" buttons jump to the form.
   BOOKING_URL: "",
+  // Optional second schedule for Build & Partner (philanthropists, investors, ground-up
+  // builds, policy). Buttons marked data-book="partner" use it; falls back to BOOKING_URL.
+  BOOKING_URL_PARTNER: "",
 
   LEADS_EMAIL: "classroomcomeback@classroomcomeback.com",
 };
@@ -19,8 +22,9 @@ document.documentElement.classList.remove("no-js");
 
 /* ---------- Booking links ---------- */
 document.querySelectorAll("[data-book]").forEach((el) => {
-  if (CC_CONFIG.BOOKING_URL) {
-    el.setAttribute("href", CC_CONFIG.BOOKING_URL);
+  const url = (el.dataset.book === "partner" && CC_CONFIG.BOOKING_URL_PARTNER) || CC_CONFIG.BOOKING_URL;
+  if (url) {
+    el.setAttribute("href", url);
     el.setAttribute("target", "_blank");
     el.setAttribute("rel", "noopener");
   }
