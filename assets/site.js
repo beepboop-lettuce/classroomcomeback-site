@@ -18,6 +18,44 @@ const CC_CONFIG = {
   LEADS_EMAIL: "classroomcomeback@classroomcomeback.com",
 };
 
+
+/* ---------- Before / after gallery ----------
+   One entry per slide, shown in this order. To add a project (e.g. Anderson Mill):
+   1. Put a matching before + after photo in /assets/photos/ (same size and framing,
+      landscape, about 1400px wide, JPEG).
+   2. Copy an entry below and change the text and file names.
+   Never use photos where a child can be identified. */
+const CC_GALLERY = [
+  {
+    project: "Palm Valley",
+    room: "Preschool classroom",
+    scope: "New flooring, fresh paint, and a fully furnished learning space",
+    before: "/assets/photos/pv-classroom-before.jpg",
+    after: "/assets/photos/pv-classroom-after.jpg",
+  },
+  {
+    project: "Palm Valley",
+    room: "Toddler room",
+    scope: "Worn tile replaced, room cleared and set up for small groups",
+    before: "/assets/photos/pv-toddler-room-before.jpg",
+    after: "/assets/photos/pv-toddler-room-after.jpg",
+  },
+  {
+    project: "Palm Valley",
+    room: "Infant room",
+    scope: "New flooring, brighter walls, and a calm infant setup",
+    before: "/assets/photos/pv-infant-room-before.jpg",
+    after: "/assets/photos/pv-infant-room-after.jpg",
+  },
+  {
+    project: "Palm Valley",
+    room: "Restroom",
+    scope: "Child-height fixtures, new flooring, and a clean, bright finish",
+    before: "/assets/photos/pv-restroom-before.jpg",
+    after: "/assets/photos/pv-restroom-after.jpg",
+  },
+];
+
 document.documentElement.classList.remove("no-js");
 
 /* ---------- Lead form ----------
@@ -161,6 +199,26 @@ if ("IntersectionObserver" in window) {
 } else {
   reveals.forEach((el) => el.classList.add("in"));
 }
+
+/* ---------- Build gallery slides from CC_GALLERY ---------- */
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+document.querySelectorAll("[data-gallery]").forEach((track) => {
+  CC_GALLERY.forEach((g, n) => {
+    const name = `${g.project}: ${g.room}`;
+    const lazy = n === 0 ? "" : ' loading="lazy"';
+    track.insertAdjacentHTML("beforeend", `
+      <div class="slide" role="group" aria-roledescription="slide" aria-label="${esc(name)}">
+        <div class="compare has-photos">
+          <div class="layer before"><img src="${esc(g.before)}" alt="${esc(g.room)} at ${esc(g.project)} before the comeback"${lazy} decoding="async"></div>
+          <div class="layer after"><img src="${esc(g.after)}" alt="${esc(g.room)} at ${esc(g.project)} after the comeback"${lazy} decoding="async"></div>
+          <span class="label l">Before</span><span class="label r">After</span>
+          <div class="divider"></div>
+          <input type="range" min="0" max="100" value="50" aria-label="Compare before and after: ${esc(name)}">
+        </div>
+        <div class="slide-caption"><h3>${esc(g.project)} · ${esc(g.room)}</h3><p>${esc(g.scope)}</p></div>
+      </div>`);
+  });
+});
 
 /* ---------- Before / after comparison sliders ---------- */
 document.querySelectorAll(".compare").forEach((cmp) => {

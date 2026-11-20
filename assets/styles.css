@@ -404,3 +404,8 @@ footer a:hover { color: var(--sun); text-decoration: underline; }
 
 .field [aria-invalid="true"] { border-color: #C0392B; background: #FDF1F0; }
 #form-errors.show { margin-bottom: .2rem; }
+
+/* real before/after photos */
+.compare.has-photos { aspect-ratio: 1352 / 577; background: var(--teal-900); }
+.compare.has-photos .layer { background: none; }
+@media (max-width: 640px) { .compare.has-photos { aspect-ratio: 3 / 2; } }
