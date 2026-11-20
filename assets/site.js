@@ -115,17 +115,29 @@ if (form) {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!form.reportValidity()) return;
+    // Tell the visitor exactly what's missing instead of failing silently.
+    const missing = [...form.querySelectorAll("[required]")].filter((el) => !el.checkValidity());
+    if (missing.length) {
+      const names = missing.map((el) => form.querySelector(`label[for="${el.id}"]`).childNodes[0].textContent.trim());
+      show("err", `Please complete: ${names.join(", ")}.`);
+      missing[0].focus({ preventScroll: true });
+      missing[0].scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
 
     const data = new FormData(form);
-    if (data.get("website")) return; // honeypot: bots fill hidden fields
+    // Hidden spam trap. Browser autofill can fill it for real people, so never drop
+    // the lead: flag it in the message and let the team decide.
+    const trap = data.get("zq_check");
+    data.delete("zq_check");
+    if (trap) data.set("message", `${data.get("message")}\n\n[Flag: hidden spam-trap field was filled]`);
     data.append("page", location.pathname);
     data.append("submittedAt", new Date().toISOString());
 
     // No endpoint yet: hand off to the visitor's email app so no lead is lost.
     if (!CC_CONFIG.LEADS_ENDPOINT) {
       const lines = [];
-      for (const [k, v] of data.entries()) if (v && k !== "website") lines.push(`${k}: ${v}`);
+      for (const [k, v] of data.entries()) if (v) lines.push(`${k}: ${v}`);
       const subject = encodeURIComponent(`New inquiry: ${data.get("name") || "Website lead"}`);
       const body = encodeURIComponent(lines.join("\n"));
       location.href = `mailto:${CC_CONFIG.LEADS_EMAIL}?subject=${subject}&body=${body}`;
