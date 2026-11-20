@@ -10,7 +10,7 @@ const CC_CONFIG = {
 
   // Scheduling link for discovery calls (Calendly, Google Calendar appointment
   // schedule, etc.). Leave empty and "Book a call" buttons jump to the form.
-  BOOKING_URL: "", // TEMP: old Discovery Call link was deleted; waiting on the new one
+  BOOKING_URL: "https://calendar.app.google/Wt5tJ4gcXBtW36g87",
   // Optional second schedule for Build & Partner (philanthropists, investors, ground-up
   // builds, policy). Buttons marked data-book="partner" use it; falls back to BOOKING_URL.
   BOOKING_URL_PARTNER: "https://calendar.app.google/duDpr1mCUP62cXnB6",
