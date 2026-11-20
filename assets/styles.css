@@ -392,7 +392,7 @@ footer a:hover { color: var(--sun); text-decoration: underline; }
 .hero::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(14, 59, 63, .96) 0%, rgba(14, 59, 63, .88) 42%, rgba(14, 59, 63, .35) 75%, rgba(14, 59, 63, .15) 100%),
+    linear-gradient(90deg, rgba(14, 59, 63, .97) 0%, rgba(14, 59, 63, .9) 48%, rgba(14, 59, 63, .5) 72%, rgba(14, 59, 63, .2) 100%),
     linear-gradient(0deg, rgba(14, 59, 63, .55) 0%, rgba(14, 59, 63, 0) 40%);
 }
 .hero .wrap { z-index: 1; }
