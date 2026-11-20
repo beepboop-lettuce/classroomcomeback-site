@@ -20,6 +20,110 @@ const CC_CONFIG = {
 
 document.documentElement.classList.remove("no-js");
 
+/* ---------- Lead form ----------
+   Set up first, so a problem anywhere else on the page can never break it.
+   The form posts natively into a hidden iframe (works in every browser and
+   isn't affected by tracking-prevention settings); JS only validates and
+   shows messages. */
+try {
+  const form = document.querySelector("form.lead-form");
+  if (form) setupLeadForm(form);
+} catch (err) {
+  console.error("Lead form setup failed", err);
+}
+
+function setupLeadForm(form) {
+  const statusBox = document.getElementById("form-status");
+  const errorBox = document.getElementById("form-errors");
+  const submitBtn = form.querySelector("button[type=submit]");
+  const frame = document.querySelector('iframe[name="cc-submit-frame"]');
+  let sending = false;
+  let watchdog;
+
+  const show = (box, kind, html) => {
+    box.className = `form-status show ${kind}`;
+    box.innerHTML = html;
+  };
+  const clear = (box) => { box.className = "form-status"; box.innerHTML = ""; };
+
+  const nextStep = () =>
+    CC_CONFIG.BOOKING_URL
+      ? ` Your next step: <a href="${CC_CONFIG.BOOKING_URL}" target="_blank" rel="noopener">book your discovery call</a>.`
+      : " We'll reach out within two business days to schedule your discovery call.";
+
+  const labelFor = (el) => {
+    const l = form.querySelector(`label[for="${el.id}"]`);
+    return l ? l.childNodes[0].textContent.trim() : el.name;
+  };
+
+  form.querySelectorAll("[required]").forEach((el) =>
+    el.addEventListener("input", () => { if (el.checkValidity()) el.removeAttribute("aria-invalid"); })
+  );
+
+  const finish = (ok) => {
+    clearTimeout(watchdog);
+    sending = false;
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Send my inquiry";
+    if (ok) {
+      form.reset();
+      clear(errorBox);
+      show(statusBox, "ok", "Thank you. Your inquiry is in, and a member of our team has been notified." + nextStep());
+    } else {
+      show(statusBox, "err", `We couldn't confirm your inquiry was sent. Please email us at <a href="mailto:${CC_CONFIG.LEADS_EMAIL}">${CC_CONFIG.LEADS_EMAIL}</a>.`);
+    }
+    statusBox.scrollIntoView({ block: "center", behavior: "smooth" });
+  };
+
+  if (frame) frame.addEventListener("load", () => { if (sending) finish(true); });
+
+  form.addEventListener("submit", (e) => {
+    clear(statusBox);
+    // Say exactly what's missing, at the top of the form AND next to the button.
+    const missing = [...form.querySelectorAll("[required]")].filter((el) => !el.checkValidity());
+    form.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid"));
+    if (missing.length) {
+      e.preventDefault();
+      missing.forEach((el) => el.setAttribute("aria-invalid", "true"));
+      const msg = `Almost there. Please complete: <strong>${missing.map(labelFor).join(", ")}</strong>.`;
+      show(errorBox, "err", msg);
+      show(statusBox, "err", msg);
+      errorBox.scrollIntoView({ block: "start", behavior: "smooth" });
+      missing[0].focus({ preventScroll: true });
+      return;
+    }
+    clear(errorBox);
+
+    // Hidden spam trap: autofill can fill it for real people, so flag, never drop.
+    const trap = form.elements.namedItem("zq_check");
+    if (trap && trap.value) {
+      form.elements.namedItem("message").value += "\n\n[Flag: hidden spam-trap field was filled]";
+      trap.value = "";
+    }
+    form.elements.namedItem("page").value = location.pathname;
+    form.elements.namedItem("submittedAt").value = new Date().toISOString();
+
+    // No endpoint configured: hand off to the visitor's email app.
+    if (!CC_CONFIG.LEADS_ENDPOINT) {
+      e.preventDefault();
+      const lines = [];
+      for (const [k, v] of new FormData(form).entries()) if (v && k !== "zq_check") lines.push(`${k}: ${v}`);
+      const subject = encodeURIComponent(`New inquiry: ${form.elements.namedItem("name").value || "Website lead"}`);
+      location.href = `mailto:${CC_CONFIG.LEADS_EMAIL}?subject=${subject}&body=${encodeURIComponent(lines.join("\n"))}`;
+      show(statusBox, "ok", "Your email app should open with your details filled in. Just press send." + nextStep());
+      return;
+    }
+
+    // Let the browser submit natively into the hidden iframe.
+    form.action = CC_CONFIG.LEADS_ENDPOINT;
+    sending = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending…";
+    watchdog = setTimeout(() => { if (sending) finish(false); }, 20000);
+  });
+}
+
+
 /* ---------- Booking links ---------- */
 document.querySelectorAll("[data-book]").forEach((el) => {
   const url = (el.dataset.book === "partner" && CC_CONFIG.BOOKING_URL_PARTNER) || CC_CONFIG.BOOKING_URL;
@@ -95,77 +199,6 @@ document.querySelectorAll(".carousel").forEach((car) => {
   car.querySelector("[data-next]").addEventListener("click", () => go(i + 1));
   go(0);
 });
-
-/* ---------- Lead form ---------- */
-const form = document.querySelector("form.lead-form");
-if (form) {
-  const statusBox = document.getElementById("form-status");
-  const submitBtn = form.querySelector("button[type=submit]");
-
-  const show = (kind, html) => {
-    statusBox.className = `form-status show ${kind}`;
-    statusBox.innerHTML = html;
-    statusBox.focus();
-  };
-
-  const nextStep = () =>
-    CC_CONFIG.BOOKING_URL
-      ? ` Your next step: <a href="${CC_CONFIG.BOOKING_URL}" target="_blank" rel="noopener">book your discovery call</a>.`
-      : " We'll reach out within two business days to schedule your discovery call.";
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    // Tell the visitor exactly what's missing instead of failing silently.
-    const missing = [...form.querySelectorAll("[required]")].filter((el) => !el.checkValidity());
-    if (missing.length) {
-      const names = missing.map((el) => form.querySelector(`label[for="${el.id}"]`).childNodes[0].textContent.trim());
-      show("err", `Please complete: ${names.join(", ")}.`);
-      missing[0].focus({ preventScroll: true });
-      missing[0].scrollIntoView({ block: "center", behavior: "smooth" });
-      return;
-    }
-
-    const data = new FormData(form);
-    // Hidden spam trap. Browser autofill can fill it for real people, so never drop
-    // the lead: flag it in the message and let the team decide.
-    const trap = data.get("zq_check");
-    data.delete("zq_check");
-    if (trap) data.set("message", `${data.get("message")}\n\n[Flag: hidden spam-trap field was filled]`);
-    data.append("page", location.pathname);
-    data.append("submittedAt", new Date().toISOString());
-
-    // No endpoint yet: hand off to the visitor's email app so no lead is lost.
-    if (!CC_CONFIG.LEADS_ENDPOINT) {
-      const lines = [];
-      for (const [k, v] of data.entries()) if (v) lines.push(`${k}: ${v}`);
-      const subject = encodeURIComponent(`New inquiry: ${data.get("name") || "Website lead"}`);
-      const body = encodeURIComponent(lines.join("\n"));
-      location.href = `mailto:${CC_CONFIG.LEADS_EMAIL}?subject=${subject}&body=${body}`;
-      show("ok", "Your email app should open with your details filled in. Just press send." + nextStep());
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Sending…";
-    try {
-      await fetch(CC_CONFIG.LEADS_ENDPOINT, {
-        method: "POST",
-        mode: "no-cors", // Apps Script redirects; we can't read the reply, only detect network failure
-        body: new URLSearchParams(data),
-      });
-      form.reset();
-      show("ok", "Thank you. Your inquiry is in, and a member of our team has been notified." + nextStep());
-    } catch (err) {
-      show(
-        "err",
-        `Something went wrong sending your inquiry. Please email us directly at <a href="mailto:${CC_CONFIG.LEADS_EMAIL}">${CC_CONFIG.LEADS_EMAIL}</a>.`
-      );
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Send my inquiry";
-    }
-  });
-}
 
 /* ---------- Footer year ---------- */
 document.querySelectorAll("[data-year]").forEach((el) => (el.textContent = new Date().getFullYear()));

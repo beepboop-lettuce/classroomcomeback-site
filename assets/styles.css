@@ -401,3 +401,6 @@ footer a:hover { color: var(--sun); text-decoration: underline; }
 @media (max-width: 59.99em) {
   .hero::after { background: linear-gradient(180deg, rgba(14, 59, 63, .82) 0%, rgba(14, 59, 63, .92) 60%, rgba(14, 59, 63, .97) 100%); }
 }
+
+.field [aria-invalid="true"] { border-color: #C0392B; background: #FDF1F0; }
+#form-errors.show { margin-bottom: .2rem; }

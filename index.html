@@ -33,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/styles.css?v=4">
+<link rel="stylesheet" href="/assets/styles.css?v=5">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -418,7 +418,11 @@
           <p>Prefer email? Write to us at<br><a href="mailto:classroomcomeback@classroomcomeback.com">classroomcomeback@<wbr>classroomcomeback.com</a></p>
         </aside>
 
-        <form class="lead-form reveal" novalidate>
+        <form class="lead-form reveal" novalidate method="POST" target="cc-submit-frame" accept-charset="UTF-8"
+              action="https://script.google.com/macros/s/AKfycby8bi527dObp6tWit3-7BP6WtgP-53x9ZB2DJnPqbSb_l6fWStemFQnEX-6seJDjcE0/exec">
+          <div id="form-errors" class="form-status" role="alert"></div>
+          <input type="hidden" name="page" value="/">
+          <input type="hidden" name="submittedAt" value="">
           <div class="field-row two">
             <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" autocomplete="name" required></div>
             <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" required></div>
@@ -491,6 +495,7 @@
           <div><button class="btn btn-primary" type="submit">Send my inquiry</button></div>
           <p class="form-note">We only use your information to respond to your inquiry. We never sell or share it.</p>
           <div id="form-status" class="form-status" role="status" tabindex="-1"></div>
+          <iframe name="cc-submit-frame" title="Form submission" hidden></iframe>
         </form>
       </div>
     </div>
@@ -533,6 +538,6 @@
   </div>
 </footer>
 
-<script src="/assets/site.js?v=4"></script>
+<script src="/assets/site.js?v=5"></script>
 </body>
 </html>
